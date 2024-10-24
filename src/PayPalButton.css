@@ -1,0 +1,8 @@
+/* PayPalButton.css */
+.paypal-button-container {
+    display: flex;
+    justify-content: center;
+
+    height: 100vh; /* Make the container take up the full viewport height */
+  }
+  
