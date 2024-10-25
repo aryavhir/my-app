@@ -25,25 +25,29 @@
     let campID = '';
     let totalImages = 6;
     let scrollInterval = null;
-    let isPageUnloading = false;
-
-    function generateAdSessionId() {
+       // Add a flag to track if we're handling a page unload
+   let isPageUnloading = false;
+   let currentAdRequestId = null; // Add this line to store current request ID
+   function generateAdSessionId() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             let r = Math.random() * 16 | 0;
             return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
         });
     }
-
-    function initializeAdSession() {
-        const storedSession = sessionStorage.getItem('adSessionData');
-        if (storedSession) {
-            const parsedSession = JSON.parse(storedSession);
-            if (parsedSession.hostname === window.location.hostname) {
-                const sessionAge = Date.now() - (parsedSession.lastAccessed || 0);
-                adSessionData = parsedSession;
-                adSessionData.lastAccessed = Date.now();
-                adSessionId = adSessionData.adSessionId;
-                saveAdSession();
+    // Modified initializeAdSession to handle page navigation within same domain
+   function initializeAdSession() {
+       const storedSession = sessionStorage.getItem('adSessionData');
+       if (storedSession) {
+           const parsedSession = JSON.parse(storedSession);
+                   // Check if we're on the same domain and session is still valid
+           if (parsedSession.hostname === window.location.hostname) {
+               const sessionAge = Date.now() - (parsedSession.lastAccessed || 0);
+                // Keep session if we're within same domain and session isn't too old
+           // (optional: add maximum session age check)
+               adSessionData = parsedSession;
+               adSessionData.lastAccessed = Date.now(); // Update last access time
+               adSessionId = adSessionData.adSessionId;
+               saveAdSession();
             } else {
                 resetAdSession();
             }
@@ -51,24 +55,21 @@
             resetAdSession();
         }
     }
-
-    function resetAdSession() {
-        adSessionData = {
-            hostname: window.location.hostname,
-            adSessionId: generateAdSessionId(),
-            adClicked: false,
-            clickTimestamp: null,
-            timeDelay: 36000000,
-            lastAccessed: Date.now()
+   function resetAdSession() {
+       adSessionData = {
+           hostname: window.location.hostname,
+           adSessionId: generateAdSessionId(),
+           adClicked: false,
+           clickTimestamp: null,
+           timeDelay: 36000000,
+           lastAccessed: Date.now() // Add timestamp for session tracking
         };
         adSessionId = adSessionData.adSessionId;
         saveAdSession();
     }
-
     function saveAdSession() {
         sessionStorage.setItem('adSessionData', JSON.stringify(adSessionData));
     }
-
     function resetSessionId() {
         adSessionId = generateAdSessionId();
         adSessionData.adSessionId = adSessionId;
@@ -81,12 +82,16 @@
         resetSessionId();
     }
 
+   // Listen for beforeunload to detect page refresh/navigation
     window.addEventListener('beforeunload', () => {
         isPageUnloading = true;
+         // This flag will be reset on the new page load
     });
 
+    // Modified visibility change handler
     document.addEventListener('visibilitychange', function() {
         if (document.hidden) {
+               // Only close session if it's not a page refresh/navigation
             if (!isPageUnloading) {
                 closeAdSession();
             }
@@ -97,6 +102,7 @@
         }
     });
 
+    // Modified focus/blur handlers
     window.addEventListener('focus', () => {
         if (!isPageUnloading && isAdClosed && !isFetchingAd && !adClicked) {
             init();
@@ -110,17 +116,16 @@
             }
         }
     });
-
     function sendErrorReport(errorCode, errorMessage) {
-        fetch(config.eventURl + '/api/v1/ad-error', {
+        fetch(config.eventURl + '/api/v1/ad-error',{
             method: 'POST',
             headers: {
                 "Content-Type": 'application/json'
             },
             body: JSON.stringify({
                 ad_session_id: adSessionId,
-                pot_session_id: "pot67890",
-                ad_request_id: generateAdSessionId(),
+                pot_session_id:"pot67890",
+                ad_request_id: currentAdRequestId, 
                 ad_id: adsId,
                 tag_id: tag_Id,
                 campaign_id: campID,
@@ -131,18 +136,19 @@
             .then(data => console.log('Error report sent:', data))
             .catch(error => console.error('Error sending error report:', error));
     }
-
+ // Modify getAdsId function to use the stored adSessionId
     async function getAdsId() {
         if (isFetchingAd) return;
         isFetchingAd = true;
         try {
+            currentAdRequestId = generateAdSessionId();
             const response = await fetch(config.callUrl + '/api/v1/fetchbanner', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ad_session_id: adSessionData.adSessionId,
                     tag_id: tag_Id,
-                    ad_request_id: generateAdSessionId(),
+                    ad_request_id: currentAdRequestId, // Use the new request ID
                     impression_count: 6,
                     pot_session_id: 'potSessionId',
                     already_shown_ad_ids: alreadyShownAds.join(",")
@@ -156,6 +162,7 @@
 
             const data = await response.json();
 
+              // Check if reset_ad is true and reset the alreadyShownAds array
             if (data.reset_ad === true) {
                 console.log('Resetting already shown ads array');
                 alreadyShownAds = [];
@@ -306,7 +313,7 @@
                     ad_session_id: adSessionId,
                     ad_id: adsId,
                     pot_session_id: "pot67890",
-                    ad_request_id: generateAdSessionId(),
+                    ad_request_id: currentAdRequestId, 
                     campaign_id: campID,
                     tag_id: tag_Id,
                     redirect_url: redirectUrl
@@ -322,6 +329,7 @@
             sendErrorReport('CLICK_TRACK_ERROR', error.message);
         }
     }
+
     function startScrolling(element, singleImageWidth) {
         if (scrollInterval) {
             clearInterval(scrollInterval);
@@ -329,7 +337,7 @@
     
         const duration = 5000; // 5 seconds for each image
         const speed = singleImageWidth / duration; 
-        let position = window.innerWidth; // Start from right edge of window
+        let position = window.innerWidth;
         let lastTimestamp = 0;
         let animationComplete = false;
     
@@ -369,6 +377,7 @@
     
         scrollInterval = requestAnimationFrame(animate);
     }
+    
     function clearAd() {
         if (adContainer) {
             adContainer.style.display = 'none';
@@ -397,7 +406,7 @@
                     ad_session_id: adSessionId,
                     ad_id: adsId,
                     pot_session_id: "pot67890",
-                    ad_request_id: generateAdSessionId(),
+                    ad_request_id: currentAdRequestId,
                     ad_position: event,
                     campaign_id: campID,
                     tag_id: tag_Id,
@@ -430,7 +439,6 @@
             sendErrorReport('FETCH_AD_EXISTING_SESSION', error.message);
         }
     }
-
     async function init() {
         initializeAdSession();
         if (shouldShowAd()) {
@@ -443,9 +451,8 @@
             }
         }
     }
-
     init();
-
+   // Add auto-refresh check interval at the end
     setInterval(() => {
         if (adSessionData.adClicked && isAdClosed && !isFetchingAd) {
             const elapsedTime = Date.now() - adSessionData.clickTimestamp;
@@ -456,5 +463,5 @@
                 init();
             }
         }
-    }, 60000);
+    }, 60000); // Check every 60 seconds
 })();
