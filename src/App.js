@@ -5,12 +5,12 @@ import MoonPayWidgetComponent from './MoonPayWidgetComponent'; // Separate compo
 const App = () => {
   return (
     <MoonPayProvider
-      apiKey="pk_test_PWr5Pa5sPtmao8CuCAWiQvECzSmY2" // Use your test API key
-      debug={true} // Enable debug logs for development
-    >
+    apiKey="pk_test_PWr5Pa5sPtmao8CuCAWiQvECzSmY2"
+    debug
+>
       <div>
         <h1>MoonPay Integration Test</h1>
-        <MoonPayWidgetComponent /> {/* Render the MoonPay widget component */}
+        <MoonPayWidgetComponent /> 
       </div>
     </MoonPayProvider>
   );
