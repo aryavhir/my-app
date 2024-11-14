@@ -4,7 +4,7 @@ import MoonPayWidgetComponent from './MoonPayWidgetComponent';
 
 const App = () => {
   return (
-    <MoonPayProvider apiKey="your_test_api_key" debug>
+    <MoonPayProvider  apiKey="pk_test_PWr5Pa5sPtmao8CuCAWiQvECzSmY2" debug>
       <div style={{ padding: '20px' }}>
         <h1>MoonPay Payment Gateway Test</h1>
         <MoonPayWidgetComponent />

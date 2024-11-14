@@ -4,8 +4,8 @@ import { MoonPayBuyWidget } from '@moonpay/moonpay-react';
 const MoonPayWidgetComponent = () => {
   const [visible, setVisible] = useState(false);
 
-  // Set your wallet address here (replace with your actual wallet address)
-  const walletAddress = "your_crypto_wallet_address_here";
+  // Replace with your actual wallet address
+  const walletAddress = "0x691F30bEd2775B7Ca597AF5608A231261fCcBE74";
 
   return (
     <div>
@@ -27,25 +27,14 @@ const MoonPayWidgetComponent = () => {
         <div style={{ position: 'relative', zIndex: 999, marginTop: '20px' }}>
           <MoonPayBuyWidget
             variant="overlay"
-            baseCurrencyCode="usd"  // User pays in USD
-            baseCurrencyAmount="4"  // Amount user needs to pay (4 USD in this case)
-            defaultCurrencyCode="usdt" // User buys USDT
-            walletAddress={walletAddress} // Your wallet address to receive USDT
+            baseCurrencyCode="usd"
+            baseCurrencyAmount="100"
+            defaultCryptoCurrencyCode="usdt"
+            walletAddress={walletAddress}
             visible={visible}
-            containerStyle={{
-              border: 'none',
-              width: '100%',
-              height: '600px'
-            }}
-            onUrlChange={(url) => {
-              console.log('URL changed:', url);  // Track the URL changes (transaction progress)
-            }}
-            onLoad={() => {
-              console.log('Widget loaded');  // When the widget loads
-            }}
-            onError={(error) => {
-              console.error('Widget error:', error);  // Capture errors if any
-            }}
+            onUrlChange={(url) => console.log('URL changed:', url)}
+            onLoad={() => console.log('Widget loaded')}
+            onError={(error) => console.error('Widget error:', error)}
           />
         </div>
       )}
