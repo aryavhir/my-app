@@ -6,28 +6,40 @@ const MoonPayWidgetComponent = () => {
 
   return (
     <div>
-      <button onClick={() => setVisible(!visible)}>
+      <button 
+        onClick={() => setVisible(!visible)}
+        style={{
+          padding: '10px 20px',
+          backgroundColor: '#007bff',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
         {visible ? 'Hide' : 'Show'} MoonPay Widget
       </button>
 
-      <div style={{ position: 'relative', zIndex: 999 }}>
+      <div style={{ position: 'relative', zIndex: 999, marginTop: '20px' }}>
         <MoonPayBuyWidget
           variant="overlay"
           baseCurrencyCode="usd"
           baseCurrencyAmount="100"
           defaultCurrencyCode="eth"
           visible={visible}
-          // Add these specific iframe settings
           containerStyle={{
             border: 'none',
             width: '100%',
-            height: '600px',
-            allowTransparency: true
+            height: '600px'
           }}
-          // Important: Add these sandbox permissions
-          iframeParameters={{
-            allow: "accelerometer; autoplay; camera; gyroscope; payment",
-            sandbox: "allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-top-navigation-by-user-activation"
+          onUrlChange={(url) => {
+            console.log('URL changed:', url);
+          }}
+          onLoad={() => {
+            console.log('Widget loaded');
+          }}
+          onError={(error) => {
+            console.error('Widget error:', error);
           }}
         />
       </div>
