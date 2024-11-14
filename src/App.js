@@ -1,18 +1,19 @@
-import './App.css';
-import PayPalButton from './PayPalButton';  // Import the PayPalButton component
+import React from 'react';
+import { MoonPayProvider } from '@moonpay/moonpay-react';
+import MoonPayWidgetComponent from './MoonPayWidgetComponent'; // Separate component for the widget
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Hydro Online</h1>
-        <p>Support Us</p>
-        {/* PayPal Button */}
-        <PayPalButton /> 
-        
-      </header>
-    </div>
+    <MoonPayProvider
+      apiKey="pk_test_PWr5Pa5sPtmao8CuCAWiQvECzSmY2" // Use your test API key
+      debug={true} // Enable debug logs for development
+    >
+      <div>
+        <h1>MoonPay Integration Test</h1>
+        <MoonPayWidgetComponent /> {/* Render the MoonPay widget component */}
+      </div>
+    </MoonPayProvider>
   );
-}
+};
 
 export default App;

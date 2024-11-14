@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './PayPalButton.css'; // Import CSS for styling
-
+import { MoonPayBuyWidget } from '@moonpay/moonpay-react';
 const PayPalButton = () => {
   const paypalRef = useRef();
 
@@ -30,10 +30,20 @@ const PayPalButton = () => {
     });
     document.body.appendChild(script);
   }, []);
-
+  const [visible, setVisible] = useState(false);
   return (
     <div className="paypal-button-container">  {/* Add a wrapper div */}
       <div ref={paypalRef}></div>  {/* PayPal button will render here */}
+      <div>  <MoonPayBuyWidget
+            variant="embedded"
+            baseCurrencyCode="usd"
+            baseCurrencyAmount="100"
+            defaultCurrencyCode="eth"
+            visible={visible}
+        />
+        <button onClick={() => setVisible(!visible)}>
+            Toggle widget
+        </button></div>
     </div>
   );
 }
